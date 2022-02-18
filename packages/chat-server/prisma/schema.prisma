@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String   @unique
+  password   String
+  avatar     String
+  tag        String
+  createTime DateTime @default(now())
+  role       String
+
+  groups                  Group[]
+  group_messages          Group_Message[]
+  friends                 Friend[]         @relation("me")
+  friends2                Friend[]         @relation("friend")
+  speaker_friend_message  Friend_Message[] @relation("speaker")
+  listener_friend_message Friend_Message[] @relation("listener")
+}
+
+model Group {
+  id         Int      @id @default(autoincrement())
+  name       String
+  notice     String
+  createTime DateTime @default(now())
+
+  users    User[]
+  messages Group_Message[]
+}
+
+model Group_Message {
+  id         Int      @id @default(autoincrement())
+  content    String
+  createTime DateTime @default(now())
+
+  userId  Int
+  groupId Int
+
+  user  User  @relation(fields: [userId], references: [id])
+  group Group @relation(fields: [groupId], references: [id])
+}
+
+model Friend {
+  id Int @id @default(autoincrement())
+
+  userId   Int?
+  friendId Int?
+
+  me              User?            @relation(fields: [userId], references: [id], name: "me")
+  friend          User?            @relation(fields: [friendId], references: [id], name: "friend")
+  friend_messages Friend_Message[]
+}
+
+model Friend_Message {
+  id         Int      @id @default(autoincrement())
+  content    String
+  createTime DateTime @default(now())
+  friendId   Int
+  speakerId  Int
+  listenerId Int
+
+  speaker  User   @relation(fields: [speakerId], references: [id], name: "speaker")
+  listener User   @relation(fields: [listenerId], references: [id], name: "listener")
+  friend   Friend @relation(fields: [friendId], references: [id])
+}
