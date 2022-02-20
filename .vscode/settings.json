@@ -2,6 +2,7 @@
     "cSpell.words": [
         "datasource",
         "nestjs",
-        "vite"
+        "vite",
+        "websockets"
     ]
 }
