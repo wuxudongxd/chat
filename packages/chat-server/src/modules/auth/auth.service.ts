@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private prisma: PrismaService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async register(username: string, password: string) {
