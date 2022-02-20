@@ -19,8 +19,6 @@ export class UserController {
 
   @Get()
   getUsers(@Query('userId', ParseIntPipe) userId: number) {
-    console.log(userId);
-
     return this.userService.getUser(userId);
   }
 
