@@ -7,7 +7,8 @@ import {
 } from '@nestjs/websockets';
 import { createWriteStream } from 'fs';
 import { join } from 'node:path';
-import { Server, Socket } from 'socket.io';
+
+import type { Server, Socket } from 'socket.io';
 
 import type { User, Group } from '@prisma/client';
 
@@ -516,9 +517,7 @@ export class ChatGateway {
   // 获取在线用户
   async getActiveGroupUser() {
     // 从socket中找到连接人数
-    // @ts-ignore;
     let userIdArr = Object.values(this.server.engine.clients).map((item) => {
-      // @ts-ignore;
       return item.request._query.userId;
     });
     // 数组去重
