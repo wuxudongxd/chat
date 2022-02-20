@@ -21,7 +21,6 @@ export function nameVerify(name: string): boolean {
  * @param password
  */
 export function passwordVerify(password: string): boolean {
-  console.log(password);
   const passwordReg = /^\w+$/gis;
   if (password.length === 0) {
     return false;

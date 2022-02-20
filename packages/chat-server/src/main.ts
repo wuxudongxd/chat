@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
 import { logger } from './common/middleware/logger.middleware';
-import { PrismaService } from './prisma.service';
+import { PrismaService } from './modules/prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

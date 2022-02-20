@@ -14,10 +14,10 @@ model User {
   id         Int      @id @default(autoincrement())
   username   String   @unique
   password   String
-  avatar     String
-  tag        String
+  avatar     String   @default("https://gravatar.com/avatar/placeholder?s=200")
+  tag        String   @default("")
   createTime DateTime @default(now())
-  role       String
+  role       String   @default("user")
 
   groups                  Group[]
   group_messages          Group_Message[]
