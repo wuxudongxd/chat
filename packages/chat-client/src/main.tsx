@@ -5,10 +5,13 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import App from "./App";
+import { ReactQuery } from "./hooks/useReactQuery";
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ReactQuery>
+      <App />
+    </ReactQuery>
   </React.StrictMode>,
   document.getElementById("root")
 );
