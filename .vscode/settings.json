@@ -4,6 +4,7 @@
         "nestjs",
         "pnpm",
         "vite",
+        "vitejs",
         "websockets"
     ]
 }
