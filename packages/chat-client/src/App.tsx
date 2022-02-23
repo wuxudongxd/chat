@@ -1,9 +1,8 @@
+import { Button } from "antd";
 import { useState } from "react";
 
 function App() {
-  const [count, setCount] = useState(0);
-
-  return <div>hello react</div>;
+  return <Button type="primary">Primary Button</Button>;
 }
 
 export default App;
