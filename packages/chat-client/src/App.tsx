@@ -2,7 +2,7 @@ import { Button } from "antd";
 import { useState } from "react";
 
 function App() {
-  return <Button type="primary">Primary Button</Button>;
+  return <h1 className="text-3xl font-bold underline">Hello world!</h1>;
 }
 
 export default App;
