@@ -4,5 +4,9 @@
   "main": "index.js",
   "repository": "https://github.com/wuxudongxd/chat.git",
   "author": "wuxudongxd <wuxudongxd@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "client:dev" :"pnpm -C ./packages/chat-client run dev",
+    "server:dev" :"pnpm -C ./packages/chat-server run dev"
+  }
 }
