@@ -10,7 +10,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async register(username: string, password: string) {
+  async signup(username: string, password: string) {
     const user = await this.prisma.user.findUnique({
       where: { username },
     });
@@ -26,10 +26,10 @@ export class AuthService {
         role: 'user',
       },
     });
-    return newUser;
+    return { user: newUser, token: this.jwtService.sign({ username }) };
   }
 
-  async login(username: string, password: string) {
+  async signin(username: string, password: string) {
     const user = await this.prisma.user.findUnique({
       where: { username },
     });

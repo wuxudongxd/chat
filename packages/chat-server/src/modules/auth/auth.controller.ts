@@ -9,17 +9,17 @@ import type { Request } from 'express';
 export class AuthController {
   constructor(private readonly authServer: AuthService) {}
 
-  @Post('register')
-  async register(@Req() req: Request) {
+  @Post('signup')
+  async signup(@Req() req: Request) {
     const user = req.user as { username: string; password: string };
 
-    return this.authServer.register(user.username, user.password);
+    return this.authServer.signup(user.username, user.password);
   }
 
-  @Post('login')
-  async login(@Req() req: Request) {
+  @Post('signin')
+  async signin(@Req() req: Request) {
     const user = req.user as { username: string; password: string };
 
-    return this.authServer.login(user.username, user.password);
+    return this.authServer.signin(user.username, user.password);
   }
 }

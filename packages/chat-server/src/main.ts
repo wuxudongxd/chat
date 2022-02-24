@@ -5,7 +5,7 @@ import { logger } from './common/middleware/logger.middleware';
 import { PrismaService } from './modules/prisma/prisma.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
 
   // 全局中间件
   app.use(logger);

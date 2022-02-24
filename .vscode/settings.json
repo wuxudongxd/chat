@@ -3,6 +3,9 @@
         "datasource",
         "nestjs",
         "pnpm",
+        "signin",
+        "signout",
+        "signup",
         "vite",
         "vitejs",
         "websockets"
