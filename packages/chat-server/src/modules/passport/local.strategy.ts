@@ -19,6 +19,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (!nameVerify(username) || !passwordVerify(password)) {
       throw new UnauthorizedException('Invalid username or password');
     }
-    return { username, password };
+    return { username, password }; // the return value is added to req.user
   }
 }

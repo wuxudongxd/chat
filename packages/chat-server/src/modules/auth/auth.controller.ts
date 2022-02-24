@@ -11,6 +11,7 @@ export class AuthController {
 
   @Post('signup')
   async signup(@Req() req: Request) {
+    // req.user is defined by the local.strategy
     const user = req.user as { username: string; password: string };
 
     return this.authServer.signup(user.username, user.password);
