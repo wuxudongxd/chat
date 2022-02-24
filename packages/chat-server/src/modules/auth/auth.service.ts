@@ -26,7 +26,10 @@ export class AuthService {
         role: 'user',
       },
     });
-    return { user: newUser, token: this.jwtService.sign({ username }) };
+    return {
+      user: newUser,
+      token: this.jwtService.sign({ id: newUser.id, username }),
+    };
   }
 
   async signin(username: string, password: string) {
@@ -43,7 +46,7 @@ export class AuthService {
     const { password: _, ...rest } = user;
     return {
       user: rest,
-      token: this.jwtService.sign({ username }),
+      token: this.jwtService.sign({ id: rest.id, username }),
     };
   }
 }

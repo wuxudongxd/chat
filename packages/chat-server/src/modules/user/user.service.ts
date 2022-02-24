@@ -8,6 +8,21 @@ import type { User } from '@prisma/client';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getUserInfo(userId: number): Promise<RESPONSE> {
+    try {
+      if (userId) {
+        const data = await this.prisma.user.findUnique({
+          where: {
+            id: userId,
+          },
+        });
+        return { code: 'ok', msg: '获取用户信息成功', data };
+      }
+    } catch (e) {
+      return { code: 'error', msg: '获取用户信息失败', data: e };
+    }
+  }
+
   async getUser(userId: number): Promise<RESPONSE> {
     try {
       if (userId) {

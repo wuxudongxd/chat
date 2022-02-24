@@ -1,12 +1,18 @@
 import Auth from "~/views/auth";
 import useUser from "./hooks/api/useUser";
+import Main from "~/views/main";
 
 function App() {
-  const { userQuery } = useUser();
+  const {
+    userQuery: { isFetching, data, isSuccess },
+  } = useUser();
 
-  console.log(userQuery);
-
-  return <Auth />;
+  return (
+    <div>
+      {!isFetching && !data && <Auth />}
+      {isSuccess && data && <Main />}
+    </div>
+  );
 }
 
 export default App;
