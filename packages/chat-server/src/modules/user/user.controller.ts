@@ -23,8 +23,6 @@ export class UserController {
   @Get()
   getUserInfo(@Req() req: Request) {
     const { id } = req.user as { id: number };
-    console.log('getUserInfo', req.user);
-
     return this.userService.getUserInfo(id);
   }
 

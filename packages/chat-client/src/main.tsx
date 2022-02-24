@@ -5,13 +5,16 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import App from "./App";
-import { ReactQuery } from "./hooks/useReactQuery";
+import { ReactQueryProvider } from "./context/react-query";
+import { SocketIoProvider } from "./context/socket-io";
 
 ReactDOM.render(
   <React.StrictMode>
-    <ReactQuery>
-      <App />
-    </ReactQuery>
+    <ReactQueryProvider>
+      <SocketIoProvider>
+        <App />
+      </SocketIoProvider>
+    </ReactQueryProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
