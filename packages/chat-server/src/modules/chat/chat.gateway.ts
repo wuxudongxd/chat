@@ -5,11 +5,12 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { createWriteStream } from 'fs';
+import { createWriteStream } from 'node:fs';
 import { join } from 'node:path';
 
 import type { Server, Socket } from 'socket.io';
 import type { User, Group } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
 @WebSocketGateway({
   cors: {
@@ -18,329 +19,165 @@ import type { User, Group } from '@prisma/client';
 })
 export class ChatGateway {
   @WebSocketServer()
-  server: Server; // io
+  io: Server; // io
 
-  @SubscribeMessage('message')
-  handleMessage(@MessageBody() message: string): void {
-    console.log('server received:', message);
-    this.server.emit('message', message);
+  // 默认群
+  defaultGroup: string;
+
+  constructor(private readonly prisma: PrismaService) {
+    this.defaultGroup = '默认聊天室';
   }
 
-  // constructor() {
-  //   this.defaultGroup = '默认聊天室';
-  // }
-  // // 默认群
-  // defaultGroup: string;
-  // // socket连接钩子
-  // async handleConnection(socket: Socket): Promise<string> {
-  //   console.log('socket', socket);
-  //   const userRoom = socket.handshake.query.userId;
-  //   console.log(socket.handshake.query);
-  //   // 连接默认加入"默认聊天室"房间
-  //   socket.join(this.defaultGroup);
-  //   // 进来统计一下在线人数
-  //   // this.getActiveGroupUser();
-  //   // 用户独有消息房间 根据userId
-  //   if (userRoom) {
-  //     socket.join(userRoom);
-  //   }
-  //   return '连接成功';
-  // }
-  // // socket断连钩子
-  // async handleDisconnect(): Promise<any> {
-  //   // this.getActiveGroupUser();
-  // }
-  // // 创建群组
-  // @SubscribeMessage('addGroup')
-  // async addGroup(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() data: Group,
-  // ): Promise<RESPONSE> {
-  //   const isUser = await this.userRepository.findOne({ userId: data.userId });
-  //   if (isUser) {
-  //     const isHaveGroup = await this.groupRepository.findOne({
-  //       groupName: data.groupName,
-  //     });
-  //     if (isHaveGroup) {
-  //       this.server.to(data.userId).emit('addGroup', {
-  //         code: 'fail',
-  //         msg: '该群名字已存在',
-  //         data: isHaveGroup,
-  //       });
-  //       return;
-  //     }
-  //     if (!nameVerify(data.groupName)) {
-  //       return;
-  //     }
-  //     data = await this.groupRepository.save(data);
-  //     socket.join(data.groupId);
-  //     const group = await this.groupUserRepository.save(data);
-  //     this.server.to(group.groupId).emit('addGroup', {
-  //       code: 'ok',
-  //       msg: `成功创建群${data.groupName}`,
-  //       data: group,
-  //     });
-  //     this.getActiveGroupUser();
-  //   } else {
-  //     this.server
-  //       .to(data.userId)
-  //       .emit('addGroup', { code: 'fail', msg: `你没资格创建群` });
-  //   }
-  // }
-  // // 加入群组
-  // @SubscribeMessage('joinGroup')
-  // async joinGroup(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() data: any,
-  // ): Promise<any> {
-  //   const isUser = await this.userRepository.findOne({ userId: data.userId });
-  //   if (isUser) {
-  //     const group = await this.groupRepository.findOne({
-  //       groupId: data.groupId,
-  //     });
-  //     let userGroup = await this.groupUserRepository.findOne({
-  //       groupId: group.groupId,
-  //       userId: data.userId,
-  //     });
-  //     const user = await this.userRepository.findOne({ userId: data.userId });
-  //     if (group && user) {
-  //       if (!userGroup) {
-  //         data.groupId = group.groupId;
-  //         userGroup = await this.groupUserRepository.save(data);
-  //       }
-  //       socket.join(group.groupId);
-  //       const res = { group: group, user: user };
-  //       this.server.to(group.groupId).emit('joinGroup', {
-  //         code: 'ok',
-  //         msg: `${user.username}加入群${group.groupName}`,
-  //         data: res,
-  //       });
-  //       this.getActiveGroupUser();
-  //     } else {
-  //       this.server
-  //         .to(data.userId)
-  //         .emit('joinGroup', { code: 'fail', msg: '进群失败', data: '' });
-  //     }
-  //   } else {
-  //     this.server
-  //       .to(data.userId)
-  //       .emit('joinGroup', { code: 'fail', msg: '你没资格进群' });
-  //   }
-  // }
-  // // 加入群组的socket连接
-  // @SubscribeMessage('joinGroupSocket')
-  // async joinGroupSocket(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() data: any,
-  // ): Promise<any> {
-  //   const group = await this.groupRepository.findOne({ groupId: data.groupId });
-  //   const user = await this.userRepository.findOne({ userId: data.userId });
-  //   if (group && user) {
-  //     socket.join(group.groupId);
-  //     const res = { group: group, user: user };
-  //     this.server.to(group.groupId).emit('joinGroupSocket', {
-  //       code: 'ok',
-  //       msg: `${user.username}加入群${group.groupName}`,
-  //       data: res,
-  //     });
-  //   } else {
-  //     this.server.to(data.userId).emit('joinGroupSocket', {
-  //       code: 'fail',
-  //       msg: '进群失败',
-  //       data: '',
-  //     });
-  //   }
-  // }
-  // // 发送群消息
-  // @SubscribeMessage('groupMessage')
-  // async sendGroupMessage(@MessageBody() data: any): Promise<any> {
-  //   const isUser = await this.userRepository.findOne({ userId: data.userId });
-  //   if (isUser) {
-  //     const userany = await this.groupUserRepository.findOne({
-  //       userId: data.userId,
-  //       groupId: data.groupId,
-  //     });
-  //     if (!userany || !data.groupId) {
-  //       this.server.to(data.userId).emit('groupMessage', {
-  //         code: 'fail',
-  //         msg: '群消息发送错误',
-  //         data: '',
-  //       });
-  //       return;
-  //     }
-  //     if (data.messageType === 'image') {
-  //       const randomName = `${Date.now()}$${data.userId}$${data.width}$${
-  //         data.height
-  //       }`;
-  //       const stream = createWriteStream(join('public/static', randomName));
-  //       stream.write(data.content);
-  //       data.content = randomName;
-  //     }
-  //     data.time = new Date().valueOf(); // 使用服务端时间
-  //     await this.groupMessageRepository.save(data);
-  //     this.server
-  //       .to(data.groupId)
-  //       .emit('groupMessage', { code: 'ok', msg: '', data: data });
-  //   } else {
-  //     this.server
-  //       .to(data.userId)
-  //       .emit('groupMessage', { code: 'fail', msg: '你没资格发消息' });
-  //   }
-  // }
-  // // 添加好友
-  // @SubscribeMessage('addFriend')
-  // async addFriend(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() data: any,
-  // ): Promise<any> {
-  //   const isUser = await this.userRepository.findOne({ userId: data.userId });
-  //   if (isUser) {
-  //     if (data.friendId && data.userId) {
-  //       if (data.userId === data.friendId) {
-  //         this.server.to(data.userId).emit('addFriend', {
-  //           code: 'fail',
-  //           msg: '不能添加自己为好友',
-  //           data: '',
-  //         });
-  //         return;
-  //       }
-  //       const relation1 = await this.friendRepository.findOne({
-  //         userId: data.userId,
-  //         friendId: data.friendId,
-  //       });
-  //       const relation2 = await this.friendRepository.findOne({
-  //         userId: data.friendId,
-  //         friendId: data.userId,
-  //       });
-  //       const roomId =
-  //         data.userId > data.friendId
-  //           ? data.userId + data.friendId
-  //           : data.friendId + data.userId;
-  //       if (relation1 || relation2) {
-  //         this.server.to(data.userId).emit('addFriend', {
-  //           code: 'fail',
-  //           msg: '已经有该好友',
-  //           data: data,
-  //         });
-  //         return;
-  //       }
-  //       const friend = await this.userRepository.findOne({
-  //         userId: data.friendId,
-  //       });
-  //       const user = await this.userRepository.findOne({ userId: data.userId });
-  //       if (!friend) {
-  //         this.server.to(data.userId).emit('addFriend', {
-  //           code: 'fail',
-  //           msg: '该好友不存在',
-  //           data: '',
-  //         });
-  //         return;
-  //       }
-  //       // 双方都添加好友 并存入数据库
-  //       await this.friendRepository.save(data);
-  //       const friendData = JSON.parse(JSON.stringify(data));
-  //       const friendId = friendData.friendId;
-  //       friendData.friendId = friendData.userId;
-  //       friendData.userId = friendId;
-  //       delete friendData._id;
-  //       await this.friendRepository.save(friendData);
-  //       socket.join(roomId);
-  //       // 如果是删掉的好友重新加, 重新获取一遍私聊消息
-  //       let messages = await getRepository(FriendMessage)
-  //         .createQueryBuilder('friendMessage')
-  //         .orderBy('friendMessage.time', 'DESC')
-  //         .where(
-  //           'friendMessage.userId = :userId AND friendMessage.friendId = :friendId',
-  //           { userId: data.userId, friendId: data.friendId },
-  //         )
-  //         .orWhere(
-  //           'friendMessage.userId = :friendId AND friendMessage.friendId = :userId',
-  //           { userId: data.userId, friendId: data.friendId },
-  //         )
-  //         .take(30)
-  //         .getMany();
-  //       messages = messages.reverse();
-  //       if (messages.length) {
-  //         friend.messages = messages;
-  //         user.messages = messages;
-  //       }
-  //       this.server.to(data.userId).emit('addFriend', {
-  //         code: 'ok',
-  //         msg: `添加好友${friend.username}成功`,
-  //         data: friend,
-  //       });
-  //       this.server.to(data.friendId).emit('addFriend', {
-  //         code: 'ok',
-  //         msg: `${user.username}添加你为好友`,
-  //         data: user,
-  //       });
-  //     }
-  //   } else {
-  //     this.server
-  //       .to(data.userId)
-  //       .emit('addFriend', { code: 'fail', msg: '你没资格加好友' });
-  //   }
-  // }
-  // // 加入私聊的socket连接
-  // @SubscribeMessage('joinFriendSocket')
-  // async joinFriend(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() data: any,
-  // ): Promise<any> {
-  //   if (data.friendId && data.userId) {
-  //     const relation = await this.friendRepository.findOne({
-  //       userId: data.userId,
-  //       friendId: data.friendId,
-  //     });
-  //     const roomId =
-  //       data.userId > data.friendId
-  //         ? data.userId + data.friendId
-  //         : data.friendId + data.userId;
-  //     if (relation) {
-  //       socket.join(roomId);
-  //       this.server.to(data.userId).emit('joinFriendSocket', {
-  //         code: 'ok',
-  //         msg: '进入私聊socket成功',
-  //         data: relation,
-  //       });
-  //     }
-  //   }
-  // }
-  // // 发送私聊消息
-  // @SubscribeMessage('friendMessage')
-  // async friendMessage(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() data: any,
-  // ): Promise<any> {
-  //   const isUser = await this.userRepository.findOne({ userId: data.userId });
-  //   if (isUser) {
-  //     if (data.userId && data.friendId) {
-  //       const roomId =
-  //         data.userId > data.friendId
-  //           ? data.userId + data.friendId
-  //           : data.friendId + data.userId;
-  //       if (data.messageType === 'image') {
-  //         const randomName = `${Date.now()}$${roomId}$${data.width}$${
-  //           data.height
-  //         }`;
-  //         const stream = createWriteStream(join('public/static', randomName));
-  //         stream.write(data.content);
-  //         data.content = randomName;
-  //       }
-  //       data.time = new Date().valueOf();
-  //       await this.friendMessageRepository.save(data);
-  //       this.server
-  //         .to(roomId)
-  //         .emit('friendMessage', { code: 'ok', msg: '', data });
-  //     }
-  //   } else {
-  //     this.server.to(data.userId).emit('friendMessage', {
-  //       code: 'fail',
-  //       msg: '你没资格发消息',
-  //       data,
-  //     });
-  //   }
-  // }
+  @SubscribeMessage('message')
+  handleMessage(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() message: string,
+  ): void {
+    console.log('server received:', message);
+    socket.volatile.to(this.defaultGroup).emit('message', message);
+  }
+
+  // socket连接钩子
+  async handleConnection(socket: Socket): Promise<string> {
+    console.log('socket connected:', socket.id);
+    // const userRoom = socket.handshake.query.userId;
+    console.log('socket query: ', socket.handshake.query);
+    // 连接默认加入"默认聊天室"房间
+    socket.join(this.defaultGroup);
+    // 进来统计一下在线人数
+    // this.getActiveGroupUser();
+    // 用户独有消息房间 根据userId
+    // if (userRoom) {
+    //   socket.join(userRoom);
+    // }
+    return '连接成功';
+  }
+
+  // socket断连钩子
+  async handleDisconnect(): Promise<any> {
+    // this.getActiveGroupUser();
+  }
+
+  // 创建群组
+  @SubscribeMessage('addGroup')
+  async addGroup(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: Partial<Group>,
+  ) {
+    try {
+      const group = await this.prisma.group.create({
+        data: {
+          name: data.name,
+          notice: '',
+        },
+      });
+      this.io.to(socket.id).emit('addGroup', group);
+    } catch (error) {
+      this.io.to(socket.id).emit('addGroup', '创建失败');
+    }
+  }
+
+  // 加入群组
+  @SubscribeMessage('joinGroup')
+  async joinGroup(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: any,
+  ): Promise<any> {
+    socket.join(data.groupId);
+    await this.prisma.user.update({
+      where: {
+        id: data.userId,
+      },
+      data: {
+        groups: {
+          connect: { id: data.groupId },
+        },
+      },
+    });
+    this.io.to(socket.id).emit('joinGroup', data.groupId);
+  }
+
+  // 发送群消息
+  @SubscribeMessage('groupMessage')
+  async sendGroupMessage(@MessageBody() data: any): Promise<any> {
+    try {
+      const message = await this.prisma.group_Message.create({
+        data: {
+          content: data.content,
+          userId: data.userId,
+          groupId: data.groupId,
+        },
+      });
+
+      this.io.to(data.groupId).emit('groupMessage', message);
+    } catch (error) {
+      this.io.to(data.groupId).emit('groupMessage', '发送失败');
+    }
+  }
+  // 添加好友
+  @SubscribeMessage('addFriend')
+  async addFriend(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: any,
+  ): Promise<any> {
+    this.prisma.user.update({
+      where: {
+        id: data.userId,
+      },
+      data: {
+        friends: {
+          connect: { id: data.friendId },
+        },
+      },
+    });
+    socket.join(`roomId_${data.userId + data.friendId}`);
+    this.io.to(socket.id).emit('addFriend', '添加成功');
+  }
+
+  // 发送私聊消息
+  @SubscribeMessage('friendMessage')
+  async friendMessage(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: any,
+  ): Promise<any> {
+    try {
+      socket.join(`roomId_${data.userId + data.friendId}`);
+      this.prisma.friend_Message.create({
+        data:{
+          
+        }
+      })
+    } catch (error) {}
+
+    // const isUser = await this.userRepository.findOne({ userId: data.userId });
+    // if (isUser) {
+    //   if (data.userId && data.friendId) {
+    //     const roomId =
+    //       data.userId > data.friendId
+    //         ? data.userId + data.friendId
+    //         : data.friendId + data.userId;
+    //     if (data.messageType === 'image') {
+    //       const randomName = `${Date.now()}$${roomId}$${data.width}$${
+    //         data.height
+    //       }`;
+    //       const stream = createWriteStream(join('public/static', randomName));
+    //       stream.write(data.content);
+    //       data.content = randomName;
+    //     }
+    //     data.time = new Date().valueOf();
+    //     await this.friendMessageRepository.save(data);
+    //     this.server
+    //       .to(roomId)
+    //       .emit('friendMessage', { code: 'ok', msg: '', data });
+    //   }
+    // } else {
+    //   this.server.to(data.userId).emit('friendMessage', {
+    //     code: 'fail',
+    //     msg: '你没资格发消息',
+    //     data,
+    //   });
+    // }
+  }
   // // 获取所有群和好友数据
   // @SubscribeMessage('chatData')
   // async getAllData(

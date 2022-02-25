@@ -19,18 +19,18 @@ model User {
   createTime DateTime @default(now())
   role       String   @default("user")
 
-  groups                  Group[]
-  group_messages          Group_Message[]
-  friends                 Friend[]         @relation("me")
-  friends2                Friend[]         @relation("friend")
-  speaker_friend_message  Friend_Message[] @relation("speaker")
-  listener_friend_message Friend_Message[] @relation("listener")
+  groups                    Group[]
+  group_messages            Group_Message[]
+  relation1                 Relation[]         @relation("relation1")
+  relation2                 Relation[]         @relation("relation2")
+  speaker_relation_message  Relation_Message[] @relation("speaker")
+  listener_relation_message Relation_Message[] @relation("listener")
 }
 
 model Group {
   id         Int      @id @default(autoincrement())
   name       String
-  notice     String
+  notice     String   @default("")
   createTime DateTime @default(now())
 
   users    User[]
@@ -49,26 +49,27 @@ model Group_Message {
   group Group @relation(fields: [groupId], references: [id])
 }
 
-model Friend {
-  id Int @id @default(autoincrement())
+model Relation {
+  id         String   @id @unique()
+  createTime DateTime @default(now())
 
-  userId   Int?
-  friendId Int?
+  relation1Id Int
+  relation2Id Int
 
-  me              User?            @relation(fields: [userId], references: [id], name: "me")
-  friend          User?            @relation(fields: [friendId], references: [id], name: "friend")
-  friend_messages Friend_Message[]
+  relation1       User               @relation(fields: [relation1Id], references: [id], name: "relation1")
+  relation2       User               @relation(fields: [relation1Id], references: [id], name: "relation2")
+  relation_messages Relation_Message[]
 }
 
-model Friend_Message {
+model Relation_Message {
   id         Int      @id @default(autoincrement())
   content    String
   createTime DateTime @default(now())
-  friendId   Int
+  relationId String
   speakerId  Int
   listenerId Int
 
-  speaker  User   @relation(fields: [speakerId], references: [id], name: "speaker")
-  listener User   @relation(fields: [listenerId], references: [id], name: "listener")
-  friend   Friend @relation(fields: [friendId], references: [id])
+  speaker  User     @relation(fields: [speakerId], references: [id], name: "speaker")
+  listener User     @relation(fields: [listenerId], references: [id], name: "listener")
+  relation Relation @relation(fields: [relationId], references: [id])
 }

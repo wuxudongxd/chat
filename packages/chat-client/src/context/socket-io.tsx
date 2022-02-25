@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 
 import type { Socket } from "socket.io-client";
 
-const socket = io("ws://localhost:3001");
+const socket = io("http://localhost:3001");
 // const socket = io();
 
 const SocketIoContext = createContext<Socket | undefined>(undefined);
