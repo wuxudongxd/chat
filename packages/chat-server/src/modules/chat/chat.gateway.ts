@@ -5,8 +5,8 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { createWriteStream } from 'node:fs';
-import { join } from 'node:path';
+// import { createWriteStream } from 'node:fs';
+// import { join } from 'node:path';
 
 import type { Server, Socket } from 'socket.io';
 import type { User, Group } from '@prisma/client';
@@ -120,18 +120,39 @@ export class ChatGateway {
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: any,
   ): Promise<any> {
-    this.prisma.user.update({
-      where: {
-        id: data.userId,
-      },
-      data: {
-        friends: {
-          connect: { id: data.friendId },
+    try {
+      const { userId, friendId } = data;
+      const relationId =
+        userId < friendId
+          ? `relation-${userId}-${friendId}`
+          : `relation-${friendId}-${userId}`;
+      await this.prisma.relation.create({
+        data: {
+          id: relationId,
+          relation1Id: userId,
+          relation2Id: friendId,
         },
-      },
-    });
-    socket.join(`roomId_${data.userId + data.friendId}`);
-    this.io.to(socket.id).emit('addFriend', '添加成功');
+      });
+      socket.join(relationId);
+      this.io.to(socket.id).emit('addFriend', '添加成功');
+    } catch (error) {
+      this.io.to(socket.id).emit('addFriend', '添加失败');
+    }
+  }
+
+  // 加入私聊的socket连接
+  @SubscribeMessage('joinFriendSocket')
+  async joinFriend(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: any,
+  ): Promise<any> {
+    const { userId, friendId } = data;
+    const relationId =
+      userId < friendId
+        ? `relation-${userId}-${friendId}`
+        : `relation-${friendId}-${userId}`;
+    socket.join(relationId);
+    this.io.to(socket.id).emit('joinFriend', '加入成功');
   }
 
   // 发送私聊消息
@@ -141,225 +162,112 @@ export class ChatGateway {
     @MessageBody() data: any,
   ): Promise<any> {
     try {
-      socket.join(`roomId_${data.userId + data.friendId}`);
-      this.prisma.friend_Message.create({
-        data:{
-          
-        }
-      })
-    } catch (error) {}
-
-    // const isUser = await this.userRepository.findOne({ userId: data.userId });
-    // if (isUser) {
-    //   if (data.userId && data.friendId) {
-    //     const roomId =
-    //       data.userId > data.friendId
-    //         ? data.userId + data.friendId
-    //         : data.friendId + data.userId;
-    //     if (data.messageType === 'image') {
-    //       const randomName = `${Date.now()}$${roomId}$${data.width}$${
-    //         data.height
-    //       }`;
-    //       const stream = createWriteStream(join('public/static', randomName));
-    //       stream.write(data.content);
-    //       data.content = randomName;
-    //     }
-    //     data.time = new Date().valueOf();
-    //     await this.friendMessageRepository.save(data);
-    //     this.server
-    //       .to(roomId)
-    //       .emit('friendMessage', { code: 'ok', msg: '', data });
-    //   }
-    // } else {
-    //   this.server.to(data.userId).emit('friendMessage', {
-    //     code: 'fail',
-    //     msg: '你没资格发消息',
-    //     data,
-    //   });
-    // }
+      const { userId, friendId, content } = data;
+      const relationId =
+        userId < friendId
+          ? `relation-${userId}-${friendId}`
+          : `relation-${friendId}-${userId}`;
+      socket.join(relationId);
+      await this.prisma.relation_Message.create({
+        data: {
+          relationId,
+          content,
+          speakerId: userId,
+          listenerId: friendId,
+        },
+      });
+    } catch (error) {
+      this.io.to(socket.id).emit('friendMessage', '发送失败');
+    }
   }
-  // // 获取所有群和好友数据
-  // @SubscribeMessage('chatData')
-  // async getAllData(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() user: User,
-  // ): Promise<any> {
-  //   const isUser = await this.userRepository.findOne({
-  //     userId: user.userId,
-  //     password: user.password,
-  //   });
-  //   if (isUser) {
-  //     let groupArr: GroupDto[] = [];
-  //     let friendArr: FriendDto[] = [];
-  //     const userGather: { [key: string]: User } = {};
-  //     let userArr: FriendDto[] = [];
-  //     const any: any[] = await this.groupUserRepository.find({
-  //       userId: user.userId,
-  //     });
-  //     const friendMap: any[] = await this.friendRepository.find({
-  //       userId: user.userId,
-  //     });
-  //     const groupPromise = any.map(async (item) => {
-  //       return await this.groupRepository.findOne({ groupId: item.groupId });
-  //     });
-  //     const groupMessagePromise = any.map(async (item) => {
-  //       let groupMessage = await getRepository(GroupMessage)
-  //         .createQueryBuilder('groupMessage')
-  //         .orderBy('groupMessage.time', 'DESC')
-  //         .where('groupMessage.groupId = :id', { id: item.groupId })
-  //         .take(30)
-  //         .getMany();
-  //       groupMessage = groupMessage.reverse();
-  //       // 这里获取一下发消息的用户的用户信息
-  //       for (const message of groupMessage) {
-  //         if (!userGather[message.userId]) {
-  //           userGather[message.userId] = await this.userRepository.findOne({
-  //             userId: message.userId,
-  //           });
-  //         }
-  //       }
-  //       return groupMessage;
-  //     });
-  //     const friendPromise = friendMap.map(async (item) => {
-  //       return await this.userRepository.findOne({
-  //         where: { userId: item.friendId },
-  //       });
-  //     });
-  //     const friendMessagePromise = friendMap.map(async (item) => {
-  //       const messages = await getRepository(FriendMessage)
-  //         .createQueryBuilder('friendMessage')
-  //         .orderBy('friendMessage.time', 'DESC')
-  //         .where(
-  //           'friendMessage.userId = :userId AND friendMessage.friendId = :friendId',
-  //           { userId: item.userId, friendId: item.friendId },
-  //         )
-  //         .orWhere(
-  //           'friendMessage.userId = :friendId AND friendMessage.friendId = :userId',
-  //           { userId: item.userId, friendId: item.friendId },
-  //         )
-  //         .take(30)
-  //         .getMany();
-  //       return messages.reverse();
-  //     });
-  //     const groups: GroupDto[] = await Promise.all(groupPromise);
-  //     const groupsMessage: Array<any[]> = await Promise.all(
-  //       groupMessagePromise,
-  //     );
-  //     groups.map((group, index) => {
-  //       if (groupsMessage[index] && groupsMessage[index].length) {
-  //         group.messages = groupsMessage[index];
-  //       }
-  //     });
-  //     groupArr = groups;
-  //     const friends: FriendDto[] = await Promise.all(friendPromise);
-  //     const friendsMessage: Array<any[]> = await Promise.all(
-  //       friendMessagePromise,
-  //     );
-  //     friends.map((friend, index) => {
-  //       if (friendsMessage[index] && friendsMessage[index].length) {
-  //         friend.messages = friendsMessage[index];
-  //       }
-  //     });
-  //     friendArr = friends;
-  //     userArr = [...Object.values(userGather), ...friendArr];
-  //     this.server.to(user.userId).emit('chatData', {
-  //       code: 'ok',
-  //       msg: '获取聊天数据成功',
-  //       data: {
-  //         groupData: groupArr,
-  //         friendData: friendArr,
-  //         userData: userArr,
-  //       },
-  //     });
-  //   }
-  // }
-  // // 退群
-  // @SubscribeMessage('exitGroup')
-  // async exitGroup(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() any: any,
-  // ): Promise<any> {
-  //   if (any.groupId === this.defaultGroup) {
-  //     return this.server
-  //       .to(any.userId)
-  //       .emit('exitGroup', { code: 'fail', msg: '默认群不可退' });
-  //   }
-  //   const user = await this.userRepository.findOne({ userId: any.userId });
-  //   const group = await this.groupRepository.findOne({
-  //     groupId: any.groupId,
-  //   });
-  //   const map = await this.groupUserRepository.findOne({
-  //     userId: any.userId,
-  //     groupId: any.groupId,
-  //   });
-  //   if (user && group && map) {
-  //     await this.groupUserRepository.remove(map);
-  //     this.server
-  //       .to(any.userId)
-  //       .emit('exitGroup', { code: 'ok', msg: '退群成功', data: any });
-  //     return this.getActiveGroupUser();
-  //   }
-  //   this.server
-  //     .to(any.userId)
-  //     .emit('exitGroup', { code: 'fail', msg: '退群失败' });
-  // }
-  // // 删好友
-  // @SubscribeMessage('exitFriend')
-  // async exitFriend(
-  //   @ConnectedSocket() socket: Socket,
-  //   @MessageBody() any: any,
-  // ): Promise<any> {
-  //   const user = await this.userRepository.findOne({ userId: any.userId });
-  //   const friend = await this.userRepository.findOne({
-  //     userId: any.friendId,
-  //   });
-  //   const map1 = await this.friendRepository.findOne({
-  //     userId: any.userId,
-  //     friendId: any.friendId,
-  //   });
-  //   const map2 = await this.friendRepository.findOne({
-  //     userId: any.friendId,
-  //     friendId: any.userId,
-  //   });
-  //   if (user && friend && map1 && map2) {
-  //     await this.friendRepository.remove(map1);
-  //     await this.friendRepository.remove(map2);
-  //     return this.server.to(any.userId).emit('exitFriend', {
-  //       code: 'ok',
-  //       msg: '删好友成功',
-  //       data: any,
-  //     });
-  //   }
-  //   this.server
-  //     .to(any.userId)
-  //     .emit('exitFriend', { code: 'fail', msg: '删好友失败' });
-  // }
-  // // 获取在线用户
-  // async getActiveGroupUser() {
-  //   // 从socket中找到连接人数
-  //   let userIdArr = Object.values(this.server.engine.sockets).map((item) => {
-  //     return item.request._query.userId;
-  //   });
-  //   // 数组去重
-  //   userIdArr = Array.from(new Set(userIdArr));
-  //   const activeGroupUserGather = {};
-  //   for (const userId of userIdArr) {
-  //     const userGroupArr = await this.groupUserRepository.find({
-  //       userId: userId,
-  //     });
-  //     const user = await this.userRepository.findOne({ userId: userId });
-  //     if (user && userGroupArr.length) {
-  //       userGroupArr.map((item) => {
-  //         if (!activeGroupUserGather[item.groupId]) {
-  //           activeGroupUserGather[item.groupId] = {};
-  //         }
-  //         activeGroupUserGather[item.groupId][userId] = user;
-  //       });
-  //     }
-  //   }
-  //   this.server.to(this.defaultGroup).emit('activeGroupUser', {
-  //     msg: 'activeGroupUser',
-  //     data: activeGroupUserGather,
-  //   });
-  // }
+
+  // 获取所有群和好友数据
+  @SubscribeMessage('chatData')
+  async getAllData(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() user: User,
+  ): Promise<any> {
+    try {
+      const groups = await this.prisma.group.findMany({
+        where: {
+          users: {
+            some: {
+              id: user.id,
+            },
+          },
+        },
+      });
+      const friends = await this.prisma.relation.findMany({
+        where: {
+          OR: [
+            {
+              relation1Id: user.id,
+            },
+            {
+              relation2Id: user.id,
+            },
+          ],
+        },
+      });
+      const data = {
+        groups,
+        friends,
+      };
+      this.io.to(socket.id).emit('chatData', data);
+    } catch (error) {
+      this.io.to(socket.id).emit('chatData', '获取失败');
+    }
+  }
+
+  // 退群
+  @SubscribeMessage('exitGroup')
+  async exitGroup(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: any,
+  ): Promise<any> {
+    try {
+      const { userId, groupId } = data;
+      if (groupId === this.defaultGroup) {
+        this.io.to(socket.id).emit('exitGroup', '默认群不能退出');
+        return;
+      }
+      socket.leave(groupId);
+      await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          groups: {
+            disconnect: { id: groupId },
+          },
+        },
+      });
+      this.io.to(socket.id).emit('exitGroup', groupId);
+    } catch (error) {
+      this.io.to(socket.id).emit('exitGroup', '退群失败');
+    }
+  }
+  // 删好友
+  @SubscribeMessage('exitFriend')
+  async exitFriend(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: any,
+  ): Promise<any> {
+    try {
+      const { userId, friendId } = data;
+      const relationId =
+        userId < friendId
+          ? `relation-${userId}-${friendId}`
+          : `relation-${friendId}-${userId}`;
+      await this.prisma.relation.delete({
+        where: {
+          id: relationId,
+        },
+      });
+      socket.leave(relationId);
+      this.io.to(socket.id).emit('exitFriend', '删除好友成功');
+    } catch (error) {
+      this.io.to(socket.id).emit('exitFriend', '删除失败');
+    }
+  }
 }
