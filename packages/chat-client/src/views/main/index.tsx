@@ -25,29 +25,27 @@ const Main = () => {
   }, []);
 
   return (
-    <div>
-      <div className="bg-[url('~/assets/bg-1.jpg')] bg-no-repeat bg-cover w-screen h-screen flex justify-center items-center">
-        <div className="w-4/5 h-4/5 backdrop-blur-[50px] shadow-2xl rounded overflow-hidden flex flex-col">
-          <div className="h-10 w-full flex justify-center items-center bg-black/50">
-            <span className="text-lg text-gray-300">默认聊天室</span>
-          </div>
-          <div className="flex-1">
-            {content.map((item: string, index: number) => {
-              return <div key={index}>{item}</div>;
-            })}
-          </div>
-          <div className="w-full h-8 flex justify-between items-center">
-            <input
-              className="w-full h-full px-4 outline-0"
-              type="text"
-              placeholder="输入消息"
-              value={input}
-              onInput={(e) => setInput((e.target as HTMLInputElement).value)}
-            />
-            <Button type="primary" className="h-full" onClick={handleEmit}>
-              发送
-            </Button>
-          </div>
+    <div className="bg-[url('~/assets/bg-1.jpg')] bg-no-repeat bg-cover w-screen h-screen flex justify-center items-center">
+      <div className="w-4/5 h-4/5 backdrop-blur-[50px] shadow-2xl rounded overflow-hidden flex flex-col">
+        <div className="h-10 w-full flex justify-center items-center bg-black/50">
+          <span className="text-lg text-gray-300">默认聊天室</span>
+        </div>
+        <div className="flex-1">
+          {content.map((item: string, index: number) => {
+            return <div key={index}>{item}</div>;
+          })}
+        </div>
+        <div className="w-full h-8 flex justify-between items-center">
+          <input
+            className="w-full h-full px-4 outline-0"
+            type="text"
+            placeholder="输入消息"
+            value={input}
+            onInput={(e) => setInput((e.target as HTMLInputElement).value)}
+          />
+          <Button type="primary" className="h-full" onClick={handleEmit}>
+            发送
+          </Button>
         </div>
       </div>
     </div>
