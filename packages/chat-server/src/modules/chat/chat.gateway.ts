@@ -40,16 +40,16 @@ export class ChatGateway {
   // socket连接钩子
   async handleConnection(socket: Socket): Promise<string> {
     console.log('socket connected:', socket.id);
-    // const userRoom = socket.handshake.query.userId;
+    const userRoom = socket.handshake.query.userId;
     console.log('socket query: ', socket.handshake.query);
     // 连接默认加入"默认聊天室"房间
     socket.join(this.defaultGroup);
     // 进来统计一下在线人数
     // this.getActiveGroupUser();
     // 用户独有消息房间 根据userId
-    // if (userRoom) {
-    //   socket.join(userRoom);
-    // }
+    if (userRoom) {
+      socket.join(`user-${userRoom}`);
+    }
     return '连接成功';
   }
 

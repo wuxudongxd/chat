@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
-import type { User } from '@prisma/client';
+import type { User, RESPONSE } from '../../../../shared/types';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getUserInfo(userId: number): Promise<RESPONSE> {
+  async getUserInfo(userId: number): Promise<RESPONSE<User>> {
     try {
       if (userId) {
         const data = await this.prisma.user.findUnique({
@@ -16,14 +16,16 @@ export class UserService {
             id: userId,
           },
         });
-        return { code: 'ok', msg: '获取用户信息成功', data };
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...rest } = data;
+        return { code: 'ok', msg: '获取用户信息成功', data: rest };
       }
     } catch (e) {
       return { code: 'error', msg: '获取用户信息失败', data: e };
     }
   }
 
-  async getUser(userId: number): Promise<RESPONSE> {
+  async getUser(userId: number): Promise<RESPONSE<User>> {
     try {
       if (userId) {
         const data = await this.prisma.user.findUnique({
@@ -38,7 +40,7 @@ export class UserService {
     }
   }
 
-  async postUsers(userIds: string): Promise<RESPONSE> {
+  async postUsers(userIds: string): Promise<RESPONSE<any>> {
     try {
       if (userIds) {
         const userIdArr = userIds.split(',');
@@ -59,7 +61,7 @@ export class UserService {
     }
   }
 
-  async updateUserName(user: User): Promise<RESPONSE> {
+  async updateUserName(user: User): Promise<RESPONSE<any>> {
     try {
       const isHaveName = await this.prisma.user.findUnique({
         where: {
@@ -83,7 +85,7 @@ export class UserService {
     }
   }
 
-  async updatePassword(user: User, password: string): Promise<RESPONSE> {
+  async updatePassword(user: User, password: string): Promise<RESPONSE<User>> {
     try {
       const updateUser = await this.prisma.user.update({
         where: {

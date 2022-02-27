@@ -1,7 +1,12 @@
+export interface RESPONSE<T> {
+  code: "ok" | "fail" | "error";
+  msg: string;
+  data: T;
+}
+
 export type User = {
   id: number;
   username: string;
-  password: string;
   avatar: string;
   tag: string;
   createTime: Date;

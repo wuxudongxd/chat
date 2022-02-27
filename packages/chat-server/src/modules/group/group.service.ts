@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { RESPONSE } from '../../../../shared/types';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -6,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class GroupService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async postGroups(groupIds: string): Promise<RESPONSE> {
+  async postGroups(groupIds: string): Promise<RESPONSE<any>> {
     try {
       if (groupIds) {
         const groupIdArr = groupIds.split(',');
@@ -25,7 +26,7 @@ export class GroupService {
     }
   }
 
-  async getUserGroups(userId: string): Promise<RESPONSE> {
+  async getUserGroups(userId: string): Promise<RESPONSE<any>> {
     try {
       return { code: 'ok', msg: '获取系统所有群成功', data: '' };
     } catch (e) {
