@@ -1,4 +1,6 @@
 import qs from "qs";
+import { useCallback } from "react";
+import { useQueryClient } from "react-query";
 
 const apiUrl = "http://localhost:3001";
 
@@ -33,4 +35,15 @@ export const http = async <T>(
     }
     return response.json() as Promise<T>;
   });
+};
+
+export const useHttp = () => {
+  const queryClient = useQueryClient();
+  const token = queryClient.getQueryData("token") as string;
+
+  return useCallback(
+    (...[endpoint, config]: Parameters<typeof http>) =>
+      http(endpoint, { ...config, token }),
+    [token]
+  );
 };
