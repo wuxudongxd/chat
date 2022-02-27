@@ -2,6 +2,7 @@ import Auth from "~/views/auth";
 import useUser from "./hooks/api/useUser";
 import Main from "~/views/main";
 import { ChatStoreProvider } from "./context/chat-store";
+import { SocketIoProvider } from "./context/socket-io";
 
 function App() {
   const {
@@ -12,9 +13,11 @@ function App() {
     <div>
       {!isFetching && !data && <Auth />}
       {isSuccess && data && (
-        <ChatStoreProvider>
-          <Main />
-        </ChatStoreProvider>
+        <SocketIoProvider>
+          <ChatStoreProvider>
+            <Main />
+          </ChatStoreProvider>
+        </SocketIoProvider>
       )}
     </div>
   );
