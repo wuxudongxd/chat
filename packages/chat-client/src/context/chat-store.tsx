@@ -5,19 +5,30 @@ import {
   useEffect,
   useReducer,
 } from "react";
-import { useQueryClient } from "react-query";
+import { useCacheUser } from "~/hooks/api/useUser";
 
 import { useSocketIo } from "./socket-io";
 
-const defaultState = {
-  counter: 0,
-  groups: [] as any,
+import type { Dispatch } from "react";
+
+interface IState {
+  groups: any[];
+  groupId: number;
+  friends: any[];
+  friendId: number;
+}
+
+const defaultState: IState = {
+  groups: [],
   groupId: -1,
-  friends: [] as any,
+  friends: [],
   friendId: -1,
 };
 
-function reducer(state = defaultState, action: any) {
+function reducer(
+  state = defaultState,
+  action: { type: string; payload?: any }
+): IState {
   switch (action.type) {
     case "DATA_INIT":
       return { ...state, ...action.payload };
@@ -25,31 +36,27 @@ function reducer(state = defaultState, action: any) {
       return { ...state, groups: [action.payload, ...state.groups] };
     case "GROUP_ID_SET":
       return { ...state, groupId: action.payload };
-    case "COUNTER_INC":
-      return { ...state, counter: state.counter + 1 };
-    case "COUNTER_DEC":
-      return { ...state, counter: state.counter - 1 };
-    case "COUNTER_RESET":
-      return { ...state, counter: 0 };
     default:
       return state;
   }
 }
 
-const ChatStoreContext = createContext<any | null>(null);
-const ChatDispatchContext = createContext<any | null>(null);
+const ChatStoreContext = createContext<IState>(defaultState);
+const ChatDispatchContext = createContext<Dispatch<{
+  type: string;
+  payload?: any;
+}> | null>(null);
 
 export const ChatStoreProvider = ({ children }: PropsWithChildren<{}>) => {
   const [state, dispatch] = useReducer(reducer, defaultState);
   const socket = useSocketIo();
-  const queryClient = useQueryClient();
-  const { data: user } = queryClient.getQueryData("user") as { data: any };
+  const user = useCacheUser();
 
   useEffect(() => {
-    // socket.on("connect", async () => {
-    //   console.log("连接成功");
-    socket.emit("chatData", user);
-    // });
+    socket.on("connect", async () => {
+      console.log("连接成功");
+      socket.emit("chatData", user);
+    });
 
     socket.on("chatData", (data: any) => {
       console.log("chatData", data);
