@@ -62,13 +62,19 @@ export class ChatGateway {
   @SubscribeMessage('addGroup')
   async addGroup(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() data: Partial<Group>,
+    @MessageBody() data: Partial<any>,
   ) {
+    console.log(data);
+
     try {
       const group = await this.prisma.group.create({
         data: {
           name: data.name,
-          notice: '',
+          users: {
+            connect: {
+              id: data.userId,
+            },
+          },
         },
       });
       this.io.to(socket.id).emit('addGroup', group);
@@ -187,6 +193,7 @@ export class ChatGateway {
     @ConnectedSocket() socket: Socket,
     @MessageBody() user: User,
   ): Promise<any> {
+    console.log('chatData', user);
     try {
       const groups = await this.prisma.group.findMany({
         where: {
@@ -213,6 +220,8 @@ export class ChatGateway {
         groups,
         friends,
       };
+      console.log('data', data);
+
       this.io.to(socket.id).emit('chatData', data);
     } catch (error) {
       this.io.to(socket.id).emit('chatData', '获取失败');

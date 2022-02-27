@@ -6,6 +6,10 @@ import type { Socket } from "socket.io-client";
 const socket = io("http://localhost:3001");
 // const socket = io();
 
+// 初始化 抛出
+// const initSocket = () => {}
+console.log("socket.io");
+
 const SocketIoContext = createContext<Socket | undefined>(undefined);
 SocketIoContext.displayName = "SocketIoContext";
 

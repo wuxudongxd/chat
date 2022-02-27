@@ -1,35 +1,50 @@
+/* eslint-disable react/no-unstable-nested-components */
 import { PlusCircleOutlined } from "@ant-design/icons";
-import { Dropdown, Menu, Select } from "antd";
+import { Button, Dropdown, Input, Menu, Modal, Select } from "antd";
+import { useState } from "react";
+import { useQueryClient } from "react-query";
+import { useChatDispatch, useChatStore } from "~/context/chat-store";
+import { useSocketIo } from "~/context/socket-io";
 
 const Room = () => {
+  const [showAddGroup, setShowAddGroup] = useState(false);
+  const [showJoinGroup, setShowJoinGroup] = useState(false);
+  const [showAddFriend, setShowAddFriend] = useState(false);
+  const [groupName, setGroupName] = useState("");
+
+  const socket = useSocketIo();
+  const queryClient = useQueryClient();
+  const user = queryClient.getQueryData("user") as { data: any };
+  const { groups, groupId } = useChatStore() as {
+    groups: any[];
+    [key: string]: any;
+  };
+  const dispatch = useChatDispatch();
+
+  console.log("groups", groups);
+
+  const addGroup = () => {
+    setShowAddGroup(false);
+    socket.emit("addGroup", { name: groupName, userId: user.data.id });
+    setGroupName("");
+  };
+
   const menu = (
     <Menu>
-      <Menu.Item>
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.antgroup.com"
+      <Menu.Item key={1}>
+        <div
+          onClick={() => {
+            setShowAddGroup(true);
+          }}
         >
-          1st menu item
-        </a>
+          新建群聊
+        </div>
       </Menu.Item>
-      <Menu.Item>
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.aliyun.com"
-        >
-          2nd menu item
-        </a>
+      <Menu.Item key={2}>
+        <div>搜索群聊</div>
       </Menu.Item>
-      <Menu.Item>
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.luohanacademy.com"
-        >
-          3rd menu item
-        </a>
+      <Menu.Item key={3}>
+        <div>搜索用户</div>
       </Menu.Item>
     </Menu>
   );
@@ -50,24 +65,45 @@ const Room = () => {
             />
           </div>
         </Dropdown>
+        <Modal title="搜索群聊" footer="" visible={showAddGroup}>
+          <div className="flex">
+            <Input
+              value={groupName}
+              onInput={(e) => {
+                e.preventDefault();
+                setGroupName((e.target as HTMLInputElement).value);
+              }}
+            />
+            <Button onClick={addGroup}>确定</Button>
+          </div>
+        </Modal>
       </div>
+
+      {/* items */}
       <div className="flex-1 overflow-auto">
-        {[...new Array(5)].map(() => {
+        {groups?.map((item, index) => {
           return (
-            <div className="h-16 bg-black/25 flex items-center cursor-pointer">
+            <div
+              key={index}
+              className={`h-16 ${
+                groupId === item.id ? "bg-black/40" : "bg-black/25"
+              }  flex items-center cursor-pointer`}
+              onClick={() => {
+                dispatch({ type: "GROUP_ID_SET", payload: item.id });
+              }}
+            >
               <img
                 className="w-8 h-8 ml-4 rounded-full"
                 src="https://gravatar.com/avatar/placeholder?s=200"
                 alt="avatar"
               />
               <div className="ml-4 flex-1 flex flex-col justify-center text-gray-300">
-                <div className="text-base">name</div>
-                <div className="text-gray-400">message</div>
+                <div className="text-base">{item.name}</div>
+                <div className="text-gray-400">{item.id}</div>
               </div>
             </div>
           );
         })}
-        <div className="h-16 bg-black/40 ">chat</div>
       </div>
     </div>
   );

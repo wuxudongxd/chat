@@ -22,7 +22,7 @@ const Chat = () => {
         setContent((prev) => [...prev, msg]);
       });
     });
-  }, []);
+  }, [socket]);
 
   return (
     <div className="flex-1 flex flex-col">
