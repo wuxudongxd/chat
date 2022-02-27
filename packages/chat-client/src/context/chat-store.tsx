@@ -90,4 +90,10 @@ export const ChatStoreProvider = ({ children }: PropsWithChildren<{}>) => {
 };
 
 export const useChatStore = () => useContext(ChatStoreContext);
-export const useChatDispatch = () => useContext(ChatDispatchContext);
+export const useChatDispatch = () => {
+  const dispatch = useContext(ChatDispatchContext);
+  if (!dispatch) {
+    throw new Error("useChatDispatch 必须在 ChatStoreProvider 中使用");
+  }
+  return dispatch;
+};

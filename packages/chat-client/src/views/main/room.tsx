@@ -2,28 +2,24 @@
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Input, Menu, Modal, Select } from "antd";
 import { useState } from "react";
-import { useQueryClient } from "react-query";
 import { useChatDispatch, useChatStore } from "~/context/chat-store";
 import { useSocketIo } from "~/context/socket-io";
+import { useCacheUser } from "~/hooks/api/useUser";
 
 const Room = () => {
+  const socket = useSocketIo();
+  const user = useCacheUser();
+  const { groups, groupId } = useChatStore();
+  const dispatch = useChatDispatch();
+
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [showJoinGroup, setShowJoinGroup] = useState(false);
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [groupName, setGroupName] = useState("");
 
-  const socket = useSocketIo();
-  const queryClient = useQueryClient();
-  const user = queryClient.getQueryData("user") as { data: any };
-  const { groups, groupId } = useChatStore() as {
-    groups: any[];
-    [key: string]: any;
-  };
-  const dispatch = useChatDispatch();
-
   const addGroup = () => {
     setShowAddGroup(false);
-    socket.emit("addGroup", { name: groupName, userId: user.data.id });
+    socket.emit("addGroup", { name: groupName, userId: user.id });
     setGroupName("");
   };
 

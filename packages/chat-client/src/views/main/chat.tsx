@@ -1,19 +1,17 @@
 import { Button } from "antd";
 import { useMemo, useState } from "react";
-import { useQueryClient } from "react-query";
 import { useChatStore } from "~/context/chat-store";
 import { useSocketIo } from "~/context/socket-io";
+import { useCacheUser } from "~/hooks/api/useUser";
 
 const Chat = () => {
   const socket = useSocketIo();
+  const user = useCacheUser();
+  const { groupId, groups } = useChatStore();
+
   const [content, setContent] = useState("");
   const [messages, setMessages] = useState<string[]>([]);
-  const queryClient = useQueryClient();
-  const { data: user } = queryClient.getQueryData("user") as { data: any };
-  const { groupId, groups } = useChatStore() as {
-    groups: any[];
-    [key: string]: any;
-  };
+  
   const ChatName = useMemo(() => {
     const curGroup = groups.find((item) => item.id === groupId);
     return curGroup?.name || "none";
