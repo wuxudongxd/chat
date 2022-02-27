@@ -1,36 +1,38 @@
 import { Button } from "antd";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQueryClient } from "react-query";
+import { useChatStore } from "~/context/chat-store";
 import { useSocketIo } from "~/context/socket-io";
 
 const Chat = () => {
   const socket = useSocketIo();
-  const [input, setInput] = useState("");
-  const [content, setContent] = useState<string[]>([]);
+  const [content, setContent] = useState("");
+  const [messages, setMessages] = useState<string[]>([]);
+  const queryClient = useQueryClient();
+  const { data: user } = queryClient.getQueryData("user") as { data: any };
+  const { groupId, groups } = useChatStore() as {
+    groups: any[];
+    [key: string]: any;
+  };
+  const ChatName = useMemo(() => {
+    const curGroup = groups.find((item) => item.id === groupId);
+    return curGroup?.name || "none";
+  }, [groupId, groups]);
 
   const handleEmit = (e: any) => {
     e.preventDefault();
-    socket.volatile.emit("message", input);
-    setContent((prev) => [...prev, input]);
-    setInput("");
+    socket.volatile.emit("groupMessage", { content, userId: user.id, groupId });
+    setMessages((prev) => [...prev, content]);
+    setContent("");
   };
-
-  useEffect(() => {
-    socket.on("connect", () => {
-      socket.on("message", (msg: string) => {
-        console.log("socket id: ", socket.id);
-        console.log("received:", msg);
-        setContent((prev) => [...prev, msg]);
-      });
-    });
-  }, [socket]);
 
   return (
     <div className="flex-1 flex flex-col">
       <div className="h-14 w-full flex justify-center items-center bg-black/50">
-        <span className="text-lg text-gray-300">默认聊天室</span>
+        <span className="text-lg text-gray-300">{ChatName}</span>
       </div>
       <div className="flex-1">
-        {content.map((item: string, index: number) => {
+        {messages.map((item: string, index: number) => {
           return <div key={index}>{item}</div>;
         })}
       </div>
@@ -39,8 +41,8 @@ const Chat = () => {
           className="w-full h-full px-4 outline-0"
           type="text"
           placeholder="输入消息"
-          value={input}
-          onInput={(e) => setInput((e.target as HTMLInputElement).value)}
+          value={content}
+          onInput={(e) => setContent((e.target as HTMLInputElement).value)}
         />
         <Button
           type="primary"

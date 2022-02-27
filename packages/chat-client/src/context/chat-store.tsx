@@ -43,12 +43,12 @@ export const ChatStoreProvider = ({ children }: PropsWithChildren<{}>) => {
   const [state, dispatch] = useReducer(reducer, defaultState);
   const socket = useSocketIo();
   const queryClient = useQueryClient();
-  const user = queryClient.getQueryData("user") as { data: any };
+  const { data: user } = queryClient.getQueryData("user") as { data: any };
 
   useEffect(() => {
     // socket.on("connect", async () => {
     //   console.log("连接成功");
-    socket.emit("chatData", user.data);
+    socket.emit("chatData", user);
     // });
 
     socket.on("chatData", (data: any) => {
@@ -63,6 +63,13 @@ export const ChatStoreProvider = ({ children }: PropsWithChildren<{}>) => {
       console.log("addGroup", data);
       dispatch({ type: "GROUP_UPDATE", payload: data });
       dispatch({ type: "GROUP_ID_SET", payload: data.id });
+    });
+
+    socket.on("groupMessage", (data) => {
+      console.log("groupMessage", data);
+      if (data.id !== user.id) {
+        dispatch({ type: "COUNTER_INC" });
+      }
     });
   }, [socket, user]);
 

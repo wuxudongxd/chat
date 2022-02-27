@@ -64,8 +64,6 @@ export class ChatGateway {
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: Partial<any>,
   ) {
-    console.log(data);
-
     try {
       const group = await this.prisma.group.create({
         data: {
@@ -77,6 +75,7 @@ export class ChatGateway {
           },
         },
       });
+      socket.join(data.groupId);
       this.io.to(socket.id).emit('addGroup', group);
     } catch (error) {
       this.io.to(socket.id).emit('addGroup', '创建失败');
@@ -106,6 +105,8 @@ export class ChatGateway {
   // 发送群消息
   @SubscribeMessage('groupMessage')
   async sendGroupMessage(@MessageBody() data: any): Promise<any> {
+    console.log('sendGroupMessage', data);
+
     try {
       const message = await this.prisma.group_Message.create({
         data: {
@@ -114,10 +115,9 @@ export class ChatGateway {
           groupId: data.groupId,
         },
       });
-
-      this.io.to(data.groupId).emit('groupMessage', message);
+      this.io.to(String(data.groupId)).emit('groupMessage', message);
     } catch (error) {
-      this.io.to(data.groupId).emit('groupMessage', '发送失败');
+      this.io.to(String(data.groupId)).emit('groupMessage', '发送失败');
     }
   }
   // 添加好友
@@ -220,8 +220,9 @@ export class ChatGateway {
         groups,
         friends,
       };
-      console.log('data', data);
-
+      for (const group of groups) {
+        socket.join(String(group.id));
+      }
       this.io.to(socket.id).emit('chatData', data);
     } catch (error) {
       this.io.to(socket.id).emit('chatData', '获取失败');

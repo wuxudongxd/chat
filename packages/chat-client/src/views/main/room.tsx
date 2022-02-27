@@ -21,8 +21,6 @@ const Room = () => {
   };
   const dispatch = useChatDispatch();
 
-  console.log("groups", groups);
-
   const addGroup = () => {
     setShowAddGroup(false);
     socket.emit("addGroup", { name: groupName, userId: user.data.id });
