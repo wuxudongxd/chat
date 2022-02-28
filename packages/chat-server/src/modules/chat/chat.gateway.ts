@@ -191,7 +191,6 @@ export class ChatGateway {
     @ConnectedSocket() socket: Socket,
     @MessageBody() user: User,
   ): Promise<any> {
-    console.log('chatData', 111);
     try {
       const groups = await this.prisma.group.findMany({
         where: {

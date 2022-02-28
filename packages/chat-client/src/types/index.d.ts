@@ -18,6 +18,21 @@ interface User {
   role: string;
 }
 
+interface Group {
+  id: number;
+  name: string;
+  notice: string;
+  createTime: Date;
+}
+
+interface Group_Message {
+  id: number;
+  content: string;
+  createTime: Date;
+  userId: number;
+  groupId: number;
+}
+
 interface AuthResponse {
   user: User;
   token: string;
