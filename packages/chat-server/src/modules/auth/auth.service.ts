@@ -21,7 +21,7 @@ export class AuthService {
       data: {
         username,
         password,
-        avatar: '',
+        avatar: 'https://gravatar.com/avatar/placeholder?s=200',
         tag: '',
         role: 'user',
       },
