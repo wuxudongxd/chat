@@ -74,7 +74,7 @@ const Room = () => {
       </div>
 
       {/* items */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto scrollbar-none">
         {groups?.map((item, index) => {
           return (
             <div
