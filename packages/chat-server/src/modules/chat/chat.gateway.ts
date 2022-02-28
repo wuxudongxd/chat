@@ -39,9 +39,7 @@ export class ChatGateway {
 
   // socket连接钩子
   async handleConnection(socket: Socket): Promise<string> {
-    console.log('socket connected:', socket.id);
     const userRoom = socket.handshake.query.userId;
-    console.log('socket query: ', socket.handshake.query);
     // 连接默认加入"默认聊天室"房间
     socket.join(this.defaultGroup);
     // 进来统计一下在线人数
@@ -193,7 +191,7 @@ export class ChatGateway {
     @ConnectedSocket() socket: Socket,
     @MessageBody() user: User,
   ): Promise<any> {
-    console.log('chatData', user);
+    console.log('chatData', 111);
     try {
       const groups = await this.prisma.group.findMany({
         where: {
@@ -203,7 +201,12 @@ export class ChatGateway {
             },
           },
         },
+        include: {
+          users: true,
+          messages: true,
+        },
       });
+
       const friends = await this.prisma.relation.findMany({
         where: {
           OR: [
