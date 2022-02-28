@@ -3,8 +3,6 @@ import { getToken } from "~/utils/token-storage";
 
 import { http } from "./useHttp";
 
-import type { User, RESPONSE } from "Shared/types";
-
 const useUser = () => {
   const userQuery = useQuery(
     "user",

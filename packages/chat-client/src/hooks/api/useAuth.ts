@@ -3,8 +3,6 @@ import { rmToken, setToken } from "~/utils/token-storage";
 
 import { http } from "./useHttp";
 
-import type { AuthResponse } from "Shared/types";
-
 const useAuth = () => {
   const queryClient = useQueryClient();
   const authServer = async (
