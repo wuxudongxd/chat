@@ -1,8 +1,10 @@
 import { Button } from "antd";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useChatStore } from "~/context/chat-store";
 import { useSocketIo } from "~/context/socket-io";
 import { useCacheUser } from "~/hooks/api/useUser";
+
+import Message from "./message";
 
 const Chat = () => {
   const socket = useSocketIo();
@@ -10,21 +12,21 @@ const Chat = () => {
   const { groupId, groups } = useChatStore();
 
   const [content, setContent] = useState("");
-  const [messages, setMessages] = useState<Group_Message[]>([]);
+
+  const messageListRef = useRef<HTMLDivElement>(null);
 
   const curGroup = useMemo(
     () => groups.find((item) => item.id === groupId),
     [groupId, groups]
   );
-
   useEffect(() => {
-    curGroup && setMessages(curGroup.messages);
+    if (!messageListRef.current) throw Error("messageListRef is not assigned");
+    messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
   }, [curGroup]);
 
   const handleEmit = (e: any) => {
     e.preventDefault();
     socket.volatile.emit("groupMessage", { content, userId: user.id, groupId });
-    // setMessages((prev) => [...prev, content]);
     setContent("");
   };
 
@@ -35,14 +37,11 @@ const Chat = () => {
           {curGroup?.name || "none"}
         </span>
       </div>
-      <div className="flex-1">
-        {messages.map((item: Group_Message, index: number) => {
-          return (
-            <div className="text-lg text-gray-300" key={index}>
-              {item.userId} {item.content}
-            </div>
-          );
-        })}
+      <div
+        ref={messageListRef}
+        className="flex-1 overflow-auto scrollbar-none mr-4"
+      >
+        {curGroup && <Message group={curGroup} />}
       </div>
       <div className="w-full h-10 flex justify-between items-center">
         <input
