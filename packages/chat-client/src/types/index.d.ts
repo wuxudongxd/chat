@@ -33,6 +33,9 @@ interface Group_Message {
   groupId: number;
 }
 
+type GroupResponse = Group & { messages: Group_Message[] } & {
+  users: User[];
+};
 interface AuthResponse {
   user: User;
   token: string;

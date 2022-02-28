@@ -12,7 +12,7 @@ import { useSocketIo } from "./socket-io";
 import type { Dispatch } from "react";
 
 interface IState {
-  groups: (Group & { messages: Group_Message[] } & { users: User[] })[];
+  groups: GroupResponse[];
   groupId: number;
   friends: any[];
   friendId: number;
