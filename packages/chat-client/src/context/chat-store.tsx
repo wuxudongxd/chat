@@ -32,10 +32,20 @@ function reducer(
   switch (action.type) {
     case "DATA_INIT":
       return { ...state, ...action.payload };
-    case "GROUP_UPDATE":
+    case "GROUPS_UPDATE":
       return { ...state, groups: [action.payload, ...state.groups] };
     case "GROUP_ID_SET":
       return { ...state, groupId: action.payload };
+    case "GROUP_MSG_UPDATE":
+      return {
+        ...state,
+        groups: state.groups.map((item) => {
+          if (item.id === state.groupId) {
+            return { ...item, messages: [...item.messages, action.payload] };
+          }
+          return item;
+        }),
+      };
     default:
       return state;
   }
@@ -68,14 +78,14 @@ export const ChatStoreProvider = ({ children }: PropsWithChildren<{}>) => {
 
     socket.on("addGroup", (data: any) => {
       console.log("addGroup", data);
-      dispatch({ type: "GROUP_UPDATE", payload: data });
+      dispatch({ type: "GROUPS_UPDATE", payload: data });
       dispatch({ type: "GROUP_ID_SET", payload: data.id });
     });
 
-    socket.on("groupMessage", (data) => {
+    socket.on("groupMessage", (data: Group_Message) => {
       console.log("groupMessage", data);
       if (data.id !== user.id) {
-        dispatch({ type: "COUNTER_INC" });
+        dispatch({ type: "GROUP_MSG_UPDATE", payload: data });
       }
     });
   }, [socket, user]);
