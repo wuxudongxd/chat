@@ -72,6 +72,10 @@ export class ChatGateway {
             },
           },
         },
+        include: {
+          users: true,
+          messages: true,
+        },
       });
       socket.join(data.groupId);
       this.io.to(socket.id).emit('addGroup', group);
