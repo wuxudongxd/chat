@@ -1,5 +1,7 @@
 - [ ] useHttp 加入 token 的请求函数 （reactQuery 缓存中获取）
 - [ ] 优化点：socket-io centent 携带 userId 作为 io(url) 中的 params，userId 从 reactQuery 缓存中获取，socket-io 移动到 Views/Main
+- [ ] error-boundary
+- [ ] 消息乐观更新
 
 1. 状态管理思路：
    1. base hook 声明全部状态变量并实现 socket 监听，其他 hook 通过 prop 获取状态和 setter 函数，封装 handle 函数，在相应组件中调用对应 hook 获取 handle 函数。不全部放在一个 hook 里是因为多次调用同一个 hook 函数会重复 socket 监听。
