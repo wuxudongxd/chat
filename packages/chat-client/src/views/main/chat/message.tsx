@@ -1,11 +1,22 @@
 import dayjs from "dayjs";
+import { useRef, useEffect } from "react";
 import { useCacheUser } from "~/hooks/api/useUser";
 
 const Message = ({ group }: { group: GroupResponse }) => {
   const { id: userId } = useCacheUser();
 
+  const messageListRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!messageListRef.current) throw Error("messageListRef is not assigned");
+    messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+  }, [group]);
+
   return (
-    <>
+    <div
+      ref={messageListRef}
+      className="flex-1 overflow-auto scrollbar-none mr-4"
+    >
       {group.messages.map((message: Group_Message) => {
         const speakUser = group.users.find(
           (user) => user.id === message.userId
@@ -36,7 +47,7 @@ const Message = ({ group }: { group: GroupResponse }) => {
           </div>
         );
       })}
-    </>
+    </div>
   );
 };
 

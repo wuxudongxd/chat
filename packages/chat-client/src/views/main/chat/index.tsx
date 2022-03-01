@@ -13,16 +13,10 @@ const Chat = () => {
 
   const [content, setContent] = useState("");
 
-  const messageListRef = useRef<HTMLDivElement>(null);
-
   const curGroup = useMemo(
     () => groups.find((item) => item.id === groupId),
     [groupId, groups]
   );
-  useEffect(() => {
-    if (!messageListRef.current) throw Error("messageListRef is not assigned");
-    messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
-  }, [curGroup]);
 
   const handleEmit = (e: any) => {
     e.preventDefault();
@@ -37,15 +31,13 @@ const Chat = () => {
           {curGroup?.name || "none"}
         </span>
       </div>
-      <div
-        ref={messageListRef}
-        className="flex-1 overflow-auto scrollbar-none mr-4"
-      >
-        {curGroup && <Message group={curGroup} />}
-      </div>
+      {curGroup && <Message group={curGroup} />}
       <div className="w-full h-10 flex justify-between items-center">
+        <div className="h-full w-10 px-7 cursor-pointer bg-white rounded-l flex justify-center items-center text-lg">
+          😃
+        </div>
         <input
-          className="w-full h-full px-4 outline-0"
+          className="w-full h-full outline-0"
           type="text"
           placeholder="输入消息"
           value={content}
