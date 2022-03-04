@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Input, Menu, Modal, Select } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useChatDispatch, useChatStore } from "~/context/chat-store";
 import { useSocketIo } from "~/context/socket-io";
 import { useCacheUser } from "~/hooks/api/useUser";
@@ -10,7 +10,15 @@ const Room = () => {
   const socket = useSocketIo();
   const user = useCacheUser();
   const { groups, groupId } = useChatStore();
+  const [groupsData, setGroupData] = useState<GroupResponse[]>([]);
+
+  useEffect(() => {
+    setGroupData(groups);
+  }, [groups]);
+
   const dispatch = useChatDispatch();
+
+  const { Option } = Select;
 
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [showJoinGroup, setShowJoinGroup] = useState(false);
@@ -18,13 +26,30 @@ const Room = () => {
   const [groupName, setGroupName] = useState("");
 
   const addGroup = () => {
-    setShowAddGroup(false);
-    socket.emit("addGroup", { name: groupName, userId: user.id });
-    setGroupName("");
+    if (groupName) {
+      setShowAddGroup(false);
+      socket.emit("addGroup", { name: groupName, userId: user.id });
+      setGroupName("");
+    }
+  };
+
+  const handleSearch = (value: string) => {
+    const mySearchData = [];
+    for (const chat of groups) {
+      if (chat.name.includes(value)) {
+        mySearchData.push(chat);
+      }
+    }
+    setGroupData(mySearchData);
+  };
+
+
+  const selectChat = () => {
+    console.log("111");
   };
 
   const menu = (
-    <Menu>
+    <Menu className="rounded">
       <Menu.Item key={1}>
         <div
           onClick={() => {
@@ -45,21 +70,45 @@ const Room = () => {
 
   return (
     <div className="w-56 bg-black/20 flex flex-col">
-      <div className="h-14 p-3 flex items-center">
+      <div className="h-14 p-3 relative">
         <Select
           showSearch
           placeholder="搜索聊天组"
-          className="w-full rounded-l"
-        />
-        <Dropdown overlay={menu} placement="bottomCenter">
-          <div className="bg-white w-10 h-full rounded-r flex justify-center items-center">
+          showArrow={false}
+          bordered={false}
+          className="bg-white w-full rounded"
+          onSearch={handleSearch}
+        >
+          {groupsData.map((group) => {
+            return (
+              <Option key={group.id} value={group.name} onClick={selectChat}>
+                {group.name}
+              </Option>
+            );
+          })}
+        </Select>
+        <Dropdown
+          overlay={menu}
+          placement="bottomCenter"
+          className="absolute top-3 right-3 w-8 h-8 flex items-center rounded-r cursor-pointer hover:bg-blue-200"
+        >
+          <div className="flex justify-center items-center">
             <PlusCircleOutlined
-              className="text-2xl"
+              className="text-xl"
               style={{ color: "#747d8c" }}
             />
           </div>
         </Dropdown>
-        <Modal title="搜索群聊" footer="" visible={showAddGroup}>
+        <Modal
+          title="搜索群聊"
+          footer=""
+          transitionName=""
+          maskTransitionName=""
+          visible={showAddGroup}
+          onCancel={() => {
+            setShowAddGroup(false);
+          }}
+        >
           <div className="flex">
             <Input
               value={groupName}
