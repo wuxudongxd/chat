@@ -4,6 +4,7 @@ import { getToken } from "~/utils/token-storage";
 import { http } from "./useHttp";
 
 const useUser = () => {
+  const queryClient = useQueryClient();
   const userQuery = useQuery(
     "user",
     async () => {
@@ -13,6 +14,7 @@ const useUser = () => {
       if (response.code !== "ok") {
         throw new Error(response.msg);
       }
+      queryClient.setQueryData("token", token);
       return response.data;
     },
     {
