@@ -31,12 +31,12 @@ function reducer(
       return {
         ...state,
         groups: state.groups.map((item) => {
-          if (item.id === state.groupId) {
+          if (item.id === action.payload.groupId) {
             return { ...item, messages: [...item.messages, action.payload] };
           }
           return item;
         }),
-      };
+      }
     default:
       return state;
   }
