@@ -37,13 +37,13 @@ export const http = async <T>(
   });
 };
 
-export const useHttp = () => {
+export const useHttp = <T>() => {
   const queryClient = useQueryClient();
   const token = queryClient.getQueryData("token") as string;
 
   return useCallback(
     (...[endpoint, config]: Parameters<typeof http>) =>
-      http(endpoint, { ...config, token }),
+      http<T>(endpoint, { ...config, token }),
     [token]
   );
 };
