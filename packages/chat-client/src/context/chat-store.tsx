@@ -1,13 +1,4 @@
-import {
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useEffect,
-  useReducer,
-} from "react";
-import { useCacheUser } from "~/hooks/api/useUser";
-
-import { useSocketIo } from "./socket-io";
+import { createContext, PropsWithChildren, useContext, useReducer } from "react";
 
 import type { Dispatch } from "react";
 
@@ -59,36 +50,6 @@ const ChatDispatchContext = createContext<Dispatch<{
 
 export const ChatStoreProvider = ({ children }: PropsWithChildren<{}>) => {
   const [state, dispatch] = useReducer(reducer, defaultState);
-  const socket = useSocketIo();
-  const user = useCacheUser();
-
-  useEffect(() => {
-    socket.on("connect", async () => {
-      console.log("连接成功");
-      socket.emit("chatData", user);
-    });
-
-    socket.on("chatData", (data: any) => {
-      console.log("chatData", data);
-      dispatch({ type: "DATA_INIT", payload: data });
-      if (data.groups.length !== 0) {
-        dispatch({ type: "GROUP_ID_SET", payload: data.groups[0].id });
-      }
-    });
-
-    socket.on("addGroup", (data: any) => {
-      console.log("addGroup", data);
-      dispatch({ type: "GROUPS_UPDATE", payload: data });
-      dispatch({ type: "GROUP_ID_SET", payload: data.id });
-    });
-
-    socket.on("groupMessage", (data: Group_Message) => {
-      console.log("groupMessage", data);
-      if (data.id !== user.id) {
-        dispatch({ type: "GROUP_MSG_UPDATE", payload: data });
-      }
-    });
-  }, [socket, user]);
 
   return (
     <ChatStoreContext.Provider value={state}>

@@ -2,10 +2,10 @@ import { PlusCircleOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Input, Menu, Modal, Select } from "antd";
 import { useMemo, useState } from "react";
 import useGroup from "~/hooks/api/useGroup";
-import useSocketEmit from "~/hooks/socket";
+import useSocketEmit from "~/hooks/socket/useSocketEmit";
 
 const Option = () => {
-  const { socketCreateGroup } = useSocketEmit();
+  const { socketCreateGroup, socketJoinGroup } = useSocketEmit();
   const { restSearchGroup } = useGroup();
   const { Option } = Select;
 
@@ -33,7 +33,7 @@ const Option = () => {
     }
   };
   const joinGroup = () => {
-    console.log("joinGroup", groupId);
+    socketJoinGroup(groupId);
   };
 
   const menu = useMemo(() => {

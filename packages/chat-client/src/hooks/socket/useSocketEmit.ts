@@ -9,7 +9,11 @@ const useSocketEmit = () => {
     socket.emit("addGroup", { name: groupName, userId: user.id });
   };
 
-  return { socketCreateGroup };
+  const socketJoinGroup = async (groupId: number) => {
+    socket.emit("joinGroup", { groupId, userId: user.id });
+  };
+
+  return { socketCreateGroup, socketJoinGroup };
 };
 
 export default useSocketEmit;
