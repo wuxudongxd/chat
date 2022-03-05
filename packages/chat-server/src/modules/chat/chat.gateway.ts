@@ -77,7 +77,7 @@ export class ChatGateway {
           messages: true,
         },
       });
-      socket.join(data.groupId);
+      socket.join(`group-${data.groupId}`);
       this.io.to(socket.id).emit('addGroup', group);
     } catch (error) {
       this.io.to(socket.id).emit('addGroup', '创建失败');
@@ -90,23 +90,32 @@ export class ChatGateway {
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: any,
   ): Promise<any> {
-    socket.join(data.groupId);
-    await this.prisma.user.update({
+    const joinedGroup = await this.prisma.group.update({
       where: {
-        id: data.userId,
+        id: data.groupId,
       },
       data: {
-        groups: {
-          connect: { id: data.groupId },
+        users: {
+          connect: {
+            id: data.userId,
+          },
         },
       },
+      include: {
+        users: true,
+        messages: true,
+      },
     });
-    this.io.to(socket.id).emit('joinGroup', data.groupId);
+    socket.join(`group-${data.groupId}`);
+    this.io.to(socket.id).emit('joinGroup', joinedGroup);
   }
 
   // 发送群消息
   @SubscribeMessage('groupMessage')
-  async sendGroupMessage(@MessageBody() data: any): Promise<any> {
+  async sendGroupMessage(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: any,
+  ): Promise<any> {
     console.log('sendGroupMessage', data);
 
     try {
@@ -117,9 +126,9 @@ export class ChatGateway {
           groupId: data.groupId,
         },
       });
-      this.io.to(String(data.groupId)).emit('groupMessage', message);
+      this.io.to(`group-${data.groupId}`).emit('groupMessage', message);
     } catch (error) {
-      this.io.to(String(data.groupId)).emit('groupMessage', '发送失败');
+      this.io.to(socket.id).emit('groupMessage', '发送失败');
     }
   }
   // 添加好友
@@ -227,7 +236,7 @@ export class ChatGateway {
         friends,
       };
       for (const group of groups) {
-        socket.join(String(group.id));
+        socket.join(`group-${group.id}`);
       }
       this.io.to(socket.id).emit('chatData', data);
     } catch (error) {

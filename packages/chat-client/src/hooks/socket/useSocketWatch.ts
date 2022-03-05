@@ -30,9 +30,14 @@ const useSocketWatch = () => {
 
     socket.on("groupMessage", (data: Group_Message) => {
       console.log("groupMessage", data);
-      if (data.id !== user.id) {
+      // if (data.id !== user.id) {
         dispatch({ type: "GROUP_MSG_UPDATE", payload: data });
-      }
+      // }
+    });
+
+    socket.on("joinGroup", (data: Group) => {
+      console.log("joinGroup", data);
+      dispatch({ type: "GROUPS_UPDATE", payload: data });
     });
   }, [dispatch, socket, user]);
 };

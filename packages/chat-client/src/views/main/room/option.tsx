@@ -32,8 +32,9 @@ const Option = () => {
       setGroupData(groups)
     }
   };
-  const joinGroup = () => {
-    socketJoinGroup(groupId);
+  const joinGroup = async () => {
+    await socketJoinGroup(groupId);
+    setShowState("");
   };
 
   const menu = useMemo(() => {
