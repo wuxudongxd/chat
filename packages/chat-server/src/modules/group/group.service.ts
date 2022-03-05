@@ -2,10 +2,29 @@ import { Injectable } from '@nestjs/common';
 import { RESPONSE } from '../../../types';
 
 import { PrismaService } from '../prisma/prisma.service';
+import type { Group } from '@prisma/client';
 
 @Injectable()
 export class GroupService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getGroupsByName(groupName: string): Promise<RESPONSE<Group[]>> {
+    try {
+      if (groupName) {
+        const groups = await this.prisma.group.findMany({
+          where: {
+            name: {
+              contains: groupName,
+            },
+          },
+        });
+        return { code: 'ok', msg: '查找群成功', data: groups };
+      }
+      return { code: 'fail', msg: '请输入群昵称', data: null };
+    } catch (e) {
+      return { code: 'error', msg: '查找群错误', data: null };
+    }
+  }
 
   async postGroups(groupIds: string): Promise<RESPONSE<any>> {
     try {
@@ -72,19 +91,5 @@ export class GroupService {
     // }
     userArr = Object.values(userGather);
     return { msg: '', data: { messageArr: 'groupMessage', userArr: userArr } };
-  }
-
-  async getGroupsByName(groupName: string) {
-    try {
-      // if (groupName) {
-      //   const groups = await this.groupRepository.find({
-      //     groupName: Like(`%${groupName}%`),
-      //   });
-      //   return { data: groups };
-      // }
-      return { msg: '请输入群昵称', data: null };
-    } catch (e) {
-      return { msg: '查找群错误', data: null };
-    }
   }
 }

@@ -8,6 +8,11 @@ import { GroupService } from './group.service';
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
+  @Get('/findByName')
+  getGroupsByName(@Query('groupName') groupName: string) {
+    return this.groupService.getGroupsByName(groupName);
+  }
+
   @Post()
   postGroups(@Body('groupIds') groupIds: string) {
     return this.groupService.postGroups(groupIds);
@@ -21,11 +26,6 @@ export class GroupController {
   @Get('/groupUser')
   getGroupUsers(@Query('groupId') groupId: string) {
     return this.groupService.getGroupUsers(groupId);
-  }
-
-  @Get('/findByName')
-  getGroupsByName(@Query('groupName') groupName: string) {
-    return this.groupService.getGroupsByName(groupName);
   }
 
   @Get('/groupMessages')
