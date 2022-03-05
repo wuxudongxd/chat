@@ -26,6 +26,7 @@ export class AuthService {
         role: 'user',
       },
     });
+    // TODO: 新增用户加入默认群聊
     return {
       user: newUser,
       token: this.jwtService.sign({ id: newUser.id, username }),

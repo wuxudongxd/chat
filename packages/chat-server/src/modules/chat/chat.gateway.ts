@@ -77,7 +77,7 @@ export class ChatGateway {
           messages: true,
         },
       });
-      socket.join(`group-${data.groupId}`);
+      socket.join(`group-${group.id}`);
       this.io.to(socket.id).emit('addGroup', group);
     } catch (error) {
       this.io.to(socket.id).emit('addGroup', '创建失败');
