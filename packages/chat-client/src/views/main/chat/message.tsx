@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { useRef, useEffect } from "react";
 import { useCacheUser } from "~/hooks/api/useUser";
 
-const Message = ({ group }: { group: GroupResponse }) => {
+const Message = ({ group }: { group: GroupWithInfo }) => {
   const { id: userId } = useCacheUser();
 
   const messageListRef = useRef<HTMLDivElement>(null);

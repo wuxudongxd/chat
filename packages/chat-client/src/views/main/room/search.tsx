@@ -4,7 +4,7 @@ import { useChatDispatch, useChatStore } from "~/context/chat-store";
 
 const Search = () => {
   const { groups } = useChatStore();
-  const [groupsData, setGroupData] = useState<GroupResponse[]>([]);
+  const [groupsData, setGroupData] = useState<GroupWithInfo[]>([]);
   const dispatch = useChatDispatch();
 
   const { Option } = Select;
