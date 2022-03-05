@@ -17,7 +17,7 @@ const Message = ({ group }: { group: GroupWithInfo }) => {
       ref={messageListRef}
       className="flex-1 overflow-auto scrollbar-none mr-4"
     >
-      {group.messages.map((message: Group_Message) => {
+      {group.messages?.map((message: Group_Message) => {
         const speakUser = group.users.find(
           (user) => user.id === message.userId
         );
@@ -28,7 +28,11 @@ const Message = ({ group }: { group: GroupWithInfo }) => {
               message.userId === userId ? "text-right" : ""
             } text-lg text-gray-200 min-h-[4rem] mt-3 mb-6`}
           >
-            <div className="flex justify-end items-center">
+            <div
+              className={`${
+                message.userId === userId ? "justify-end" : "justify-start"
+              } flex items-center ml-2`}
+            >
               <img
                 className="w-6 h-6 rounded-full mr-2"
                 src={speakUser?.avatar}
