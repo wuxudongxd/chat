@@ -11,6 +11,7 @@ export class GroupService {
   async getGroupsByName(groupName: string): Promise<RESPONSE<Group[]>> {
     try {
       if (groupName) {
+        // TODO: 这里查找有点不完善
         const groups = await this.prisma.group.findMany({
           where: {
             name: {
