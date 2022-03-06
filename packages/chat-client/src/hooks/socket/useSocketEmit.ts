@@ -13,7 +13,11 @@ const useSocketEmit = () => {
     socket.emit("joinGroup", { groupId, userId: user.id });
   };
 
-  return { socketCreateGroup, socketJoinGroup };
+  const socketGroupMessage = async (content: string, groupId: number) => {
+    socket.emit("groupMessage", { content, userId: user.id, groupId });
+  };
+
+  return { socketCreateGroup, socketJoinGroup, socketGroupMessage };
 };
 
 export default useSocketEmit;
