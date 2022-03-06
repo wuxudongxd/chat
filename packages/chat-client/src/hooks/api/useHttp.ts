@@ -38,7 +38,7 @@ export const http = async <T>(
 
 export const useHttp = () => {
   const queryClient = useQueryClient();
-  const token = queryClient.getQueryData("token") as string;
+  const token = queryClient.getQueryData<string>("token");
   
   return <T>(...[endpoint, config]: Parameters<typeof http>) =>
     http<T>(endpoint, { ...config, token });
