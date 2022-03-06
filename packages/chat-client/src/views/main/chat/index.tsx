@@ -15,7 +15,7 @@ const Chat = () => {
   return (
     <div className="flex-1 flex flex-col">
       <div className="h-14 w-full flex justify-center items-center bg-black/50">
-        <span className="text-lg text-gray-300">
+        <span className="text-lg text-gray-300 select-none">
           {curGroup?.name || "none"}
         </span>
       </div>

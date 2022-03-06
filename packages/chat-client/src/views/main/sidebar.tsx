@@ -8,7 +8,7 @@ import { Tooltip } from "antd";
 
 const Sidebar = () => {
   return (
-    <div className="w-20 bg-black/50 flex flex-col justify-between items-center py-4 text-gray-300 text-lg overflow-hidden">
+    <div className="w-20 bg-black/50 flex flex-col justify-between items-center py-4 text-gray-300 text-lg overflow-hidden select-none">
       <div className="flex flex-col items-center">
         <img
           className="w-12 rounded-full"

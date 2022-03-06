@@ -5,7 +5,7 @@ const Rooms = () => {
   const dispatch = useChatDispatch();
 
   return (
-    <div className="flex-1 overflow-auto scrollbar-none">
+    <div className="flex-1 overflow-auto scrollbar-none select-none">
       {groups?.map((item, index) => {
         return (
           <div

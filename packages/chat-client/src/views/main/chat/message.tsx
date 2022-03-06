@@ -31,7 +31,7 @@ const Message = ({ group }: { group: GroupWithInfo }) => {
             <div
               className={`${
                 message.userId === userId ? "justify-end" : "justify-start"
-              } flex items-center ml-2`}
+              } flex items-center ml-2 select-none`}
             >
               <img
                 className="w-6 h-6 rounded-full mr-2"

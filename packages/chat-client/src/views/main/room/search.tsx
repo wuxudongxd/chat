@@ -33,7 +33,7 @@ const Search = () => {
       placeholder="搜索聊天组"
       showArrow={false}
       bordered={false}
-      className="bg-white w-full rounded"
+      className="bg-white w-full rounded select-none"
       onSearch={handleSearch}
       onSelect={selectChat}
     >
