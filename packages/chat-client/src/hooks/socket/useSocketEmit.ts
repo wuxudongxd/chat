@@ -1,6 +1,12 @@
 import { useSocketIo } from "~/context/socket-io";
 import { useCacheUser } from "~/hooks/api/useUser";
 
+interface GroupMessageProps {
+  content: string | File;
+  groupId: number;
+  messageType: "text" | "image";
+}
+
 const useSocketEmit = () => {
   const socket = useSocketIo();
   const user = useCacheUser();
@@ -13,8 +19,17 @@ const useSocketEmit = () => {
     socket.emit("joinGroup", { groupId, userId: user.id });
   };
 
-  const socketGroupMessage = async (content: string, groupId: number) => {
-    socket.emit("groupMessage", { content, userId: user.id, groupId });
+  const socketGroupMessage = async ({
+    content,
+    groupId,
+    messageType,
+  }: GroupMessageProps) => {
+    socket.emit("groupMessage", {
+      content,
+      userId: user.id,
+      groupId,
+      messageType,
+    });
   };
 
   return { socketCreateGroup, socketJoinGroup, socketGroupMessage };

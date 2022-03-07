@@ -41,6 +41,7 @@ model Group_Message {
   id         Int      @id @default(autoincrement())
   content    String
   createTime DateTime @default(now())
+  messageType String   @default("text")
 
   userId  Int
   groupId Int

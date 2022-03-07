@@ -5,8 +5,8 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-// import { createWriteStream } from 'node:fs';
-// import { join } from 'node:path';
+import { createWriteStream } from 'node:fs';
+import { join } from 'node:path';
 
 import type { Server, Socket } from 'socket.io';
 import type { User, Group } from '@prisma/client';
@@ -116,14 +116,22 @@ export class ChatGateway {
     @ConnectedSocket() socket: Socket,
     @MessageBody() data: any,
   ): Promise<any> {
-    console.log('sendGroupMessage', data);
-
+    if (data.messageType === 'image') {
+      const randomName = `${Date.now()}$${data.userId}$${data.groupId}$${
+        Math.random() * 100
+      }`;
+      const stream = createWriteStream(join('public/static', randomName));
+      stream.write(data.content);
+      data.content = randomName;
+      console.log('sendGroupMessage', data);
+    }
     try {
       const message = await this.prisma.group_Message.create({
         data: {
           content: data.content,
           userId: data.userId,
           groupId: data.groupId,
+          messageType: data.messageType,
         },
       });
       this.io.to(`group-${data.groupId}`).emit('groupMessage', message);

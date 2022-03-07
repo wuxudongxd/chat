@@ -31,6 +31,7 @@ interface Group_Message {
   createTime: Date;
   userId: number;
   groupId: number;
+  messageType: "text" | "image";
 }
 
 type GroupWithInfo = Group & { messages: Group_Message[] } & {
