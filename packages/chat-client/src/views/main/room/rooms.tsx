@@ -24,7 +24,6 @@ const Rooms = () => {
             />
             <div className="ml-4 flex-1 flex flex-col justify-center text-gray-300">
               <div className="text-base">{item.name}</div>
-              <div className="text-gray-400">{item.id}</div>
             </div>
           </div>
         );
