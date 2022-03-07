@@ -110,6 +110,7 @@ const Option = () => {
             showSearch
             placeholder="搜索群聊"
             showArrow={false}
+            notFoundContent={null}
             className="bg-white w-full rounded"
             onSearch={searchGroup}
             onSelect={(id: number) => {
