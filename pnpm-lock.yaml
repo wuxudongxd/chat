@@ -66,6 +66,7 @@ importers:
       '@nestjs/platform-express': ^8.4.0
       '@nestjs/platform-socket.io': ^8.4.0
       '@nestjs/schematics': ^8.0.7
+      '@nestjs/serve-static': ^2.2.2
       '@nestjs/testing': ^8.4.0
       '@nestjs/websockets': ^8.4.0
       '@prisma/client': ^3.10.0
@@ -107,6 +108,7 @@ importers:
       '@nestjs/passport': 8.2.1_7279ab1fdcd161f1ce2d9179e8fa21f7
       '@nestjs/platform-express': 8.4.0_31e7036b193d6d3c9cadab18cbb4af84
       '@nestjs/platform-socket.io': 8.4.0_7b1c6bbc5f4f45bfb52145e85e855bcf
+      '@nestjs/serve-static': 2.2.2_31e7036b193d6d3c9cadab18cbb4af84
       '@nestjs/websockets': 8.4.0_fd447c0bc20e12069fb0cea7a1c425c3
       '@prisma/client': 3.10.0_prisma@3.10.0
       passport: 0.5.2
@@ -1140,6 +1142,17 @@ packages:
     transitivePeerDependencies:
       - chokidar
     dev: true
+
+  /@nestjs/serve-static/2.2.2_31e7036b193d6d3c9cadab18cbb4af84:
+    resolution: {integrity: sha512-3Mr+Q/npS3N7iGoF3Wd6Lj9QcjMGxbNrSqupi5cviM0IKrZ1BHl5qekW95rWYNATAVqoTmjGROAq+nKKpuUagQ==}
+    peerDependencies:
+      '@nestjs/common': ^6.0.0 || ^7.0.0 || ^8.0.0
+      '@nestjs/core': ^6.0.0 || ^7.0.0 || ^8.0.0
+    dependencies:
+      '@nestjs/common': 8.4.0_0a8b9973a45cbeaad6b0063efdcaad84
+      '@nestjs/core': 8.4.0_a03564308f4046787ae20495109cfd36
+      path-to-regexp: 0.1.7
+    dev: false
 
   /@nestjs/testing/8.4.0_5038ecb39d0fed2140e79e9371a95289:
     resolution: {integrity: sha512-Gk9OW4RpiIGDOROHS7O271uJEpIddQP94zlkPOVOu3HPUxntfKbmDU4cDaCqC0PQ9Jtj71C0H1j9RS8ituYLAw==}
