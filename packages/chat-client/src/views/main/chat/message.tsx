@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { useRef, useEffect } from "react";
+import ImgPreview from "~/components/ImgPreview";
 import { useCacheUser } from "~/hooks/api/useUser";
 
 const Message = ({ group }: { group: GroupWithInfo }) => {
@@ -46,7 +47,14 @@ const Message = ({ group }: { group: GroupWithInfo }) => {
               </div>
             </div>
             <div className="bg-black/30 inline-block max-w-lg text-left mt-2 ml-4 p-2 text-base break-words rounded-md">
-              {message.content}
+              {message.messageType === "image" ? (
+                <ImgPreview
+                  className="w-48"
+                  src={`http://localhost:3001/static/${message.content}`}
+                />
+              ) : (
+                <span>{message.content}</span>
+              )}
             </div>
           </div>
         );
