@@ -20,3 +20,14 @@
 
 **部署**
 * docker-compose 完成部署
+
+### 效果预览
+
+**新建群聊**
+
+![message](./docs/image/message.webp)
+
+
+**emoji、图片支持**
+
+![image-support](./docs/image/image-support.webp)
