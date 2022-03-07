@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RESPONSE } from '../../../types';
+import { RESPONSE } from '../../types';
 
 import { PrismaService } from '../prisma/prisma.service';
 import type { Group } from '@prisma/client';
